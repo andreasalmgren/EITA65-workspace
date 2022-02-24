@@ -1,0 +1,14 @@
+34.88.44.178
+
+gcloud beta compute ssh --zone "europe-north1-a" "instance-1"  --project "project-328712"
+
+redis-server --port 7777 --protected-mode no
+
+from home terminal you can do: 
+redis-cli -h 34.88.44.178 -p 7777
+
+gcloud compute scp dog.jpg --zone "europe-north1-a" "instance-1":/
+
+gcloud compute scp PATHTOYOURFILE --zone ZONEOFYOURINSTANCE YOURINSTANCENAME:~
+
+https://console.cloud.google.com/compute/instances?onCreate=true&organizationId=1043212334690&project=project-328712&supportedpurview=project&cloudshell=true
