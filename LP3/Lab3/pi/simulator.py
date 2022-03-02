@@ -73,8 +73,7 @@ def run(id, current_coords, from_coords, to_coords, SERVER_URL):
     waiting(id)
     
     ##Tar drönare från pickup plats till drop off
-    draw(redCreeper)
-    play("space-odyssey.mp3")
+    draw(redCreeper)-    play("space-odyssey.mp3")
     partOfRun(id, from_coords, to_coords)
     
     play("doorbell.mp3")
