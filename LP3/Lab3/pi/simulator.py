@@ -3,14 +3,19 @@ import requests
 import argparse
 from sense_hat import SenseHat
 from time import sleep
+import pygame
+
 
 sense = SenseHat() 
+pygame.mixer.init()
+
 
 g = (0, 255, 0)
 r = (255, 0, 0)
 b = (255, 255, 204)
        
 greenAlien = [
+g,g,g,g,g,g,g,g,
 g,g,g,g,g,g,g,g,
 g,g,g,g,g,g,g,g,
 g,g,g,g,g,g,g,g,
@@ -57,18 +62,27 @@ def moveDrone(src, d_long, d_la):
     ##Denna funktion kallar på andra funktioner för att flytta drönarna och uppdatera status
 def run(id, current_coords, from_coords, to_coords, SERVER_URL):
 
-    ##Tar drönare från nuvarande plats till pick up uppdaterar current_coords (hoppas jag)
+    ##Tar drönare från nuvarande plats till pick up uppdaterar current_coords
+    draw(redCreeper)
+    play("coin.wav")
+    sleep(3)
+    play("space-odyssey.mp3")
     partOfRun(id, current_coords, from_coords)
-
-    waiting()
-
-    ##Tar drönare från pickup plats till drop off
-    partOfRun(id, current_coords, to_coords)
     
-    waiting()
+    play("doorbell.mp3")
+    waiting(id)
+    
+    ##Tar drönare från pickup plats till drop off
+    draw(redCreeper)
+    play("space-odyssey.mp3")
+    partOfRun(id, from_coords, to_coords)
+    
+    play("doorbell.mp3")
+    waiting(id)
 
     ##Denna del sättesense.set_pixels(image)r sedan status till idle
     updateStatus(id, 'idle', current_coords)
+    draw(greenAlien)
 
     return current_coords[0], current_coords[1]
 
@@ -88,12 +102,17 @@ def updateStatus(id, status, current_coords):
                       'latitude': current_coords[1],
                       'status': status
                       }
+        print(drone_info)
         resp = session.post(SERVER_URL, json=drone_info)
         
 def draw(image):
     sense.set_pixels(image)
+    
+def play(tune):
+    pygame.mixer.music.load(tune)
+    pygame.mixer.music.play()
 
-def waiting():
+def waiting(id):
     updateStatus(id, 'waiting', current_coords)
     sense.clear()
     draw(steve)
