@@ -1,6 +1,43 @@
 import math
 import requests
 import argparse
+from sense_hat import SenseHat
+from time import sleep
+
+sense = SenseHat() 
+
+g = (0, 255, 0)
+r = (255, 0, 0)
+b = (255, 255, 204)
+       
+greenAlien = [
+g,g,g,g,g,g,g,g,
+g,g,g,g,g,g,g,g,
+g,g,g,g,g,g,g,g,
+g,g,g,g,g,g,g,g,
+g,g,g,g,g,g,g,g,
+g,g,g,g,g,g,g,g,
+g,g,g,g,g,g,g,g]
+
+redCreeper = [
+r,r,r,r,r,r,r,r,
+r,r,r,r,r,r,r,r,
+r,r,r,r,r,r,r,r,
+r,r,r,r,r,r,r,r,
+r,r,r,r,r,r,r,r,
+r,r,r,r,r,r,r,r,
+r,r,r,r,r,r,r,r,
+r,r,r,r,r,r,r,r]
+
+steve = [
+b,b,b,b,b,b,b,b,
+b,b,b,b,b,b,b,b,
+b,b,b,b,b,b,b,b,
+b,b,b,b,b,b,b,b,
+b,b,b,b,b,b,b,b,
+b,b,b,b,b,b,b,b,
+b,b,b,b,b,b,b,b,
+b,b,b,b,b,b,b,b]
 
 def getMovement(src, dst):
     speed = 0.00001
@@ -23,10 +60,14 @@ def run(id, current_coords, from_coords, to_coords, SERVER_URL):
     ##Tar drönare från nuvarande plats till pick up uppdaterar current_coords (hoppas jag)
     partOfRun(id, current_coords, from_coords)
 
+    waiting()
+
     ##Tar drönare från pickup plats till drop off
     partOfRun(id, current_coords, to_coords)
+    
+    waiting()
 
-    ##Denna del sätter sedan status till idle
+    ##Denna del sättesense.set_pixels(image)r sedan status till idle
     updateStatus(id, 'idle', current_coords)
 
     return current_coords[0], current_coords[1]
@@ -48,11 +89,30 @@ def updateStatus(id, status, current_coords):
                       'status': status
                       }
         resp = session.post(SERVER_URL, json=drone_info)
+        
+def draw(image):
+    sense.set_pixels(image)
+
+def waiting():
+    updateStatus(id, 'waiting', current_coords)
+    sense.clear()
+    draw(steve)
+    joystick = " "
+    while joystick is not "up":
+      for event in sense.stick.get_events():
+        # Check if the joystick was pressed
+        if event.action == "pressed":
+          # Check which direction
+          if event.direction == "up":
+              joystick = "up"
+          # Wait a while and then clear the screen
+          sleep(0.5)
+
 
 if __name__ == "__main__":
     # Fill in the IP address of server, in order to location of the drone to the SERVER
     #===================================================================
-    SERVER_URL = "http://192.168.0.3:6379/drone"
+    SERVER_URL = "http://192.168.0.3:5001/drone"
     #===================================================================
 
     parser = argparse.ArgumentParser()

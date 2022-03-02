@@ -19,7 +19,10 @@ e,e,e,e,e,e,e,e
 ]
 
 sense.set_pixels(image)
-
-while True:
+i = 0
+while i < 5:
     sleep(1)
     sense.flip_h()
+    i += 1
+    
+sense.clear()
