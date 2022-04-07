@@ -2,7 +2,6 @@ from datetime import datetime
 import qrcode
 
 
-
 # HÄMTA TIDEN
 now = datetime.now()
 
