@@ -12,4 +12,4 @@ print("Current Time =", current_time)
 
 img = qrcode.make(current_time)
 
-img.save("sample.png")
+img.save("bbbbbbb.png")
