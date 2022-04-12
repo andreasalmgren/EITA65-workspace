@@ -8,7 +8,7 @@ publicKey, privateKey = rsa.newkeys(1024)
 print(publicKey)
 print(privateKey)
 
-# HÄMTA TIDEN
+# HMTA TIDEN
 now = datetime.now()
 
 current_time = now.strftime("%H:%M:%S")
