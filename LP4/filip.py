@@ -33,7 +33,7 @@ def displayBbox(im, bbox):
             cv2.line(im, tuple(bbox[0][i]), tuple(bbox[0][(i+1) % n]), (0,255,0), 3)
 
 if __name__ == '__main__':
-    img = cv2.imread('testKrypto2.png')
+    img = cv2.imread('test35.jpg')
     detector = cv2.QRCodeDetector()
     print(pyzbar.decode(img))
     res = (pyzbar.decode(img)[0].data)
