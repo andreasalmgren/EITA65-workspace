@@ -1,43 +1,5 @@
+import cv2, rsa
 import pyzbar.pyzbar as pyzbar
-import rsa, cv2, qrcode
-from datetime import datetime
-
-publicKey, privateKey = rsa.newkeys(1024)
-
-
-print(publicKey)
-print(privateKey)
-
-with open('publicKey.txt', 'wb+') as f:
-    pk = publicKey.save_pkcs1(format='PEM')
-    f.write(pk)
-with open('privateKey.txt', 'wb+') as f:
-    pk = privateKey.save_pkcs1(format='PEM')
-    f.write(pk)
-print(publicKey)
-with open('publicKey.txt', 'rb') as f:
-    publicKey = rsa.PublicKey.load_pkcs1(f.read(), format='PEM')
-print(publicKey)
-with open('privateKey.txt', 'rb') as f:
-    privateKey = rsa.PrivateKey.load_pkcs1(f.read(), format='PEM')
-print(type(privateKey))
-# HÄMTA TIDEN
-
-now = datetime.now()
-
-current_time = now.strftime("%H:%M:%S")
-print("Current Time =", current_time)
-
-#GENERERA QR-KOD
-ID = 'Filips Personnummer'
-klartext = str(current_time) + ' ' + ID
-krypto = rsa.encrypt(klartext.encode(), publicKey)
-img = qrcode.make(str(krypto))
-img.save("testKrypto2.png")
-print(krypto)
-
-print(rsa.decrypt(krypto, privateKey).decode())
-
 
 def displayBbox(im, bbox):
     if bbox is not None:
@@ -47,7 +9,7 @@ def displayBbox(im, bbox):
             cv2.line(im, tuple(bbox[0][i]), tuple(bbox[0][(i+1) % n]), (0,255,0), 3)
 
 if __name__ == '__main__':
-    img = cv2.imread('test35.jpg')
+    img = cv2.imread('testKrypto2.png')
     detector = cv2.QRCodeDetector()
     print(pyzbar.decode(img))
     res = (pyzbar.decode(img)[0].data)
@@ -79,4 +41,3 @@ if __name__ == '__main__':
 cv2.imshow("Image", img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
