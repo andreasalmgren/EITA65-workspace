@@ -1,5 +1,6 @@
 from datetime import datetime
-import qrcode
+import qrcode, rsa, cv2
+import pyzbar.pyzbar as pyzbar
 
 
 # HÄMTA TIDEN
@@ -10,6 +11,15 @@ print("Current Time =", current_time)
 
 #GENERERA QR-KOD
 
-img = qrcode.make(current_time)
+with open('publicKey.txt', 'rb') as f:
+    publicKey = rsa.PublicKey.load_pkcs1(f.read(), format='PEM')
+print(type(publicKey))
 
-img.save("bbbbbbb.png")
+klartext = current_time + ' ' + "Unik identifierare"
+krypto = rsa.encrypt(klartext.encode(), publicKey)
+print(klartext)
+
+
+img = qrcode.make(str(krypto))
+img.save("dd.png")
+

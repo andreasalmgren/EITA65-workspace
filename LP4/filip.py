@@ -7,7 +7,19 @@ publicKey, privateKey = rsa.newkeys(1024)
 
 print(publicKey)
 print(privateKey)
-
+with open('publicKey.txt', 'wb+') as f:
+    pk = publicKey.save_pkcs1(format='PEM')
+    f.write(pk)
+with open('privateKey.txt', 'wb+') as f:
+    pk = privateKey.save_pkcs1(format='PEM')
+    f.write(pk)
+print(publicKey)
+with open('publicKey.txt', 'rb') as f:
+    publicKey = rsa.PublicKey.load_pkcs1(f.read(), format='PEM')
+print(publicKey)
+with open('privateKey.txt', 'rb') as f:
+    privateKey = rsa.PrivateKey.load_pkcs1(f.read(), format='PEM')
+print(type(privateKey))
 # HÄMTA TIDEN
 now = datetime.now()
 

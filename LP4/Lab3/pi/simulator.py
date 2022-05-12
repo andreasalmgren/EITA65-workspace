@@ -1,10 +1,12 @@
-import math
-import requests
-import argparse
+import math, requests, argparse, pygame, rsa, cv2
+import pyzbar.pyzbar as pyzbar
+from picamera import PiCamera
 from sense_hat import SenseHat
 from time import sleep
-import pygame
 
+with open('privateKey.txt', 'rb') as f:
+    privateKey = rsa.PrivateKey.load_pkcs1(f.read(), format='PEM')
+print(type(privateKey))
 
 sense = SenseHat() 
 pygame.mixer.init()
@@ -79,11 +81,32 @@ def run(id, current_coords, from_coords, to_coords, SERVER_URL):
     play("doorbell.mp3")
     waiting(id)
 
-    ##Denna del sättesense.set_pixels(image)r sedan status till idle
+    #Här vill vi har vår check funktion vi kanske måste skriva om delarna som använder sensehat :s
+    check()
+
+
+
+    ##Denna del sätter sedan status till idle
     updateStatus(id, 'idle', current_coords)
     draw(greenAlien)
 
     return current_coords[0], current_coords[1]
+
+def check():
+    countdown = 30
+    confirmedUser = False
+    while (countdown is not 0 and confirmedUser):
+        filePath = '/home/pi/diggi/EITA65-workspace/LP4/bilder/test1.jpg'
+        takePicture(filePath)
+        img = cv2.imread(filePath)
+        res = bytes(pyzbar.decode(img)[0].data.decode('unicode_escape')[2:-1], encoding="raw_unicode_escape")
+        print(res)
+        decMessage = rsa.decrypt(res, privateKey).decode()
+        print("decrypted string: ", decMessage)
+        #Här behövs try och catches samt en koll av tid och massa formatering och skit
+
+def takePicture():
+    PiCamera.capture('/home/pi/diggi/EITA65-workspace/LP4/bilder/test1.jpg')  # directory
 
     ##Denna flyttar drönare från a till b och kallar på updateStatus under tiden
 def partOfRun(id, current, finnish):
