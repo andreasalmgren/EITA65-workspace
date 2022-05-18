@@ -106,7 +106,7 @@ def check():
         filePath = '/home/pi/diggi/EITA65-workspace/LP4/bilder/test1.jpg'
         camera.capture(filePath)
         img = cv2.imread(filePath)
-        ##img = cv2.imread('/home/pi/diggi/EITA65-workspace/LP4/Lab3/phone/dd.png')
+        #img = cv2.imread('/home/pi/diggi/EITA65-workspace/LP4/Lab3/phone/dd.png')
         detector = cv2.QRCodeDetector()
         isthere, points = detector.detect(img)
         print(isthere)
@@ -121,11 +121,14 @@ def check():
                 time_from_pi = convert(tid)
                 time_from_drone = convert(datetime.now().strftime("%H:%M:%S"))
                 
-                if abs(time_from_pi - time_from_drone) < 180 or (time_from_pi - time_from_drone - 86400) < 180 or abs(
-                        time_from_pi - time_from_drone + 86400) < 180:
-                    if decMessage[9:] is customer:
+                print(tid)
+                print(datetime.now().strftime("%H:%M:%S"))
+                
+                if abs(time_from_pi - time_from_drone) < 180 or (time_from_pi - time_from_drone - 86400) < 180 or abs(time_from_pi - time_from_drone + 86400) < 180:
+                    print(decMessage[9:])
+                    print(customer)
+                    if decMessage[9:] == customer:
                         confirmedUser = True
-
             except:
                 print("lol fel krypterat, klick klack")
 
@@ -142,7 +145,8 @@ def check():
     ##Denna flyttar drönare från a till b och kallar på updateStatus under tiden
 def convert(time_to_convert):
     ftr = [3600, 60, 1]
-    sum([a * b for a, b in zip(ftr, map(int, time_to_convert.split(':')))])
+    print('hej') 
+    return sum([a * b for a, b in zip(ftr, map(int, time_to_convert.split(':')))])
 
 
 def partOfRun(id, current, finnish):
