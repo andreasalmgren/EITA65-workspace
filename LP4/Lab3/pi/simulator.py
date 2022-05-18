@@ -1,17 +1,20 @@
-import math, requests, argparse, pygame, rsa, cv2
+import math, requests, argparse, pygame, rsa, cv2, re
 import pyzbar.pyzbar as pyzbar
 from picamera import PiCamera
 from sense_hat import SenseHat
 from time import sleep
+from datetime import datetime
+
+
 
 with open('privateKey.txt', 'rb') as f:
     privateKey = rsa.PrivateKey.load_pkcs1(f.read(), format='PEM')
 print(type(privateKey))
 
 camera = PiCamera()
-
 ##sense = SenseHat() 
 pygame.mixer.init()
+customer = 'Person som har köpt saker'
 
 
 g = (0, 255, 0)
@@ -108,11 +111,25 @@ def check():
         isthere, points = detector.detect(img)
         print(isthere)
         if isthere:
-            confirmedUser = True
-            res = bytes(pyzbar.decode(img)[0].data.decode('unicode_escape')[2:-1], encoding="raw_unicode_escape")
-            print(res)
-            decMessage = rsa.decrypt(res, privateKey).decode()
-            print("decrypted string: ", decMessage)
+            decMessage = ""
+            try:
+                res = bytes(pyzbar.decode(img)[0].data.decode('unicode_escape')[2:-1], encoding="raw_unicode_escape")
+                print(res)
+                decMessage = rsa.decrypt(res, privateKey).decode()
+                print("decrypted string: ", decMessage)
+                tid = decMessage[:7]
+                time_from_pi = convert(tid)
+                time_from_drone = convert(datetime.now().strftime("%H:%M:%S"))
+                
+                if abs(time_from_pi - time_from_drone) < 180 or (time_from_pi - time_from_drone - 86400) < 180 or abs(
+                        time_from_pi - time_from_drone + 86400) < 180:
+                    if decMessage[9:] is customer:
+                        confirmedUser = True
+
+            except:
+                print("lol fel krypterat, klick klack")
+
+
             #Här behövs try och catches samt en koll av tid och massa formatering och skit
         countdown -= 1
     camera.stop_preview()
@@ -123,6 +140,11 @@ def check():
 
 
     ##Denna flyttar drönare från a till b och kallar på updateStatus under tiden
+def convert(time_to_convert):
+    ftr = [3600, 60, 1]
+    sum([a * b for a, b in zip(ftr, map(int, time_to_convert.split(':')))])
+
+
 def partOfRun(id, current, finnish):
     d_long, d_la = getMovement(current, finnish)
     while ((finnish[0] - current[0]) ** 2 + (finnish[1] - current[1]) ** 2) * 10 ** 6 > 0.0002:

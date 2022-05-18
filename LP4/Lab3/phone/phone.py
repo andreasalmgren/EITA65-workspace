@@ -7,6 +7,7 @@ import pyzbar.pyzbar as pyzbar
 now = datetime.now()
 
 current_time = now.strftime("%H:%M:%S")
+print(type(current_time))
 print("Current Time =", current_time)
 
 #GENERERA QR-KOD
