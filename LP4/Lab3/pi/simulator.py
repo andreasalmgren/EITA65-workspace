@@ -8,7 +8,9 @@ with open('privateKey.txt', 'rb') as f:
     privateKey = rsa.PrivateKey.load_pkcs1(f.read(), format='PEM')
 print(type(privateKey))
 
-sense = SenseHat() 
+camera = PiCamera()
+
+##sense = SenseHat() 
 pygame.mixer.init()
 
 
@@ -66,19 +68,19 @@ def run(id, current_coords, from_coords, to_coords, SERVER_URL):
 
     ##Tar drönare från nuvarande plats till pick up uppdaterar current_coords
     ##draw(redCreeper)
-    play("coin.wav")
+    ##play("coin.wav")
     sleep(3)
-    play("space-odyssey.mp3")
+    ##play("space-odyssey.mp3")
     partOfRun(id, current_coords, from_coords)
     
-    play("doorbell.mp3")
+    ##play("doorbell.mp3")
     waiting(id)
     
     ##Tar drönare från pickup plats till drop off
     ##draw(redCreeper)-    play("space-odyssey.mp3")
     partOfRun(id, from_coords, to_coords)
     
-    play("doorbell.mp3")
+    ##play("doorbell.mp3")
     waiting(id)
 
     #Här vill vi har vår check funktion vi kanske måste skriva om delarna som använder sensehat :s
@@ -93,16 +95,19 @@ def run(id, current_coords, from_coords, to_coords, SERVER_URL):
     return current_coords[0], current_coords[1]
 
 def check():
-    countdown = 30
+    countdown = 5
     confirmedUser = False
-    while (countdown is not 0 or not confirmedUser):
+    camera.start_preview()
+    while (countdown is not 0 and not confirmedUser):
+        print(countdown)
         filePath = '/home/pi/diggi/EITA65-workspace/LP4/bilder/test1.jpg'
-        PiCamera.capture(filePath)
+        camera.capture(filePath)
         img = cv2.imread(filePath)
-        ##img = cv2.imread('/home/pi/diggi/EITA65-workspace/LP4/bilder/test2.jpg')
+        ##img = cv2.imread('/home/pi/diggi/EITA65-workspace/LP4/Lab3/phone/dd.png')
         detector = cv2.QRCodeDetector()
         isthere, points = detector.detect(img)
-        if isthere is not None:
+        print(isthere)
+        if isthere:
             confirmedUser = True
             res = bytes(pyzbar.decode(img)[0].data.decode('unicode_escape')[2:-1], encoding="raw_unicode_escape")
             print(res)
@@ -110,6 +115,7 @@ def check():
             print("decrypted string: ", decMessage)
             #Här behövs try och catches samt en koll av tid och massa formatering och skit
         countdown -= 1
+    camera.stop_preview()
     if confirmedUser:
         print("ok")
     else:
@@ -161,7 +167,7 @@ def waiting(id):
 if __name__ == "__main__":
     # Fill in the IP address of server, in order to location of the drone to the SERVER
     #===================================================================
-    SERVER_URL = "http://192.168.0.3:5001/drone"
+    SERVER_URL = "http://192.168.0.2:5001/drone"
     #===================================================================
 
     parser = argparse.ArgumentParser()

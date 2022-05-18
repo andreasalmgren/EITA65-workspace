@@ -3,7 +3,7 @@ import qrcode, rsa, cv2
 import pyzbar.pyzbar as pyzbar
 
 
-# HÄMTA TIDEN
+# HAMTA TIDEN
 now = datetime.now()
 
 current_time = now.strftime("%H:%M:%S")

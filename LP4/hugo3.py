@@ -9,7 +9,7 @@ def displayBox(im, box):
             cv2.line(im, tuple(box[0][i]), tuple(box[0][(i + 1) % n]), (0,255,0), 3)
 
 if __name__ == '__main__':
-    img = cv2.imread('test35.jpg')
+    img = cv2.imread('test30.jpg')
     detector = cv2.QRCodeDetector()
     res, points, _ = detector.detectAndDecode(img)
 
