@@ -65,7 +65,7 @@ def moveDrone(src, d_long, d_la):
 def run(id, current_coords, from_coords, to_coords, SERVER_URL):
 
     ##Tar drönare från nuvarande plats till pick up uppdaterar current_coords
-    draw(redCreeper)
+    ##draw(redCreeper)
     play("coin.wav")
     sleep(3)
     play("space-odyssey.mp3")
@@ -75,7 +75,7 @@ def run(id, current_coords, from_coords, to_coords, SERVER_URL):
     waiting(id)
     
     ##Tar drönare från pickup plats till drop off
-    draw(redCreeper)-    play("space-odyssey.mp3")
+    ##draw(redCreeper)-    play("space-odyssey.mp3")
     partOfRun(id, from_coords, to_coords)
     
     play("doorbell.mp3")
@@ -88,25 +88,33 @@ def run(id, current_coords, from_coords, to_coords, SERVER_URL):
 
     ##Denna del sätter sedan status till idle
     updateStatus(id, 'idle', current_coords)
-    draw(greenAlien)
+    ##draw(greenAlien)
 
     return current_coords[0], current_coords[1]
 
 def check():
     countdown = 30
     confirmedUser = False
-    while (countdown is not 0 and confirmedUser):
+    while (countdown is not 0 or not confirmedUser):
         filePath = '/home/pi/diggi/EITA65-workspace/LP4/bilder/test1.jpg'
-        takePicture(filePath)
+        PiCamera.capture(filePath)
         img = cv2.imread(filePath)
-        res = bytes(pyzbar.decode(img)[0].data.decode('unicode_escape')[2:-1], encoding="raw_unicode_escape")
-        print(res)
-        decMessage = rsa.decrypt(res, privateKey).decode()
-        print("decrypted string: ", decMessage)
-        #Här behövs try och catches samt en koll av tid och massa formatering och skit
+        ##img = cv2.imread('/home/pi/diggi/EITA65-workspace/LP4/bilder/test2.jpg')
+        detector = cv2.QRCodeDetector()
+        isthere, points = detector.detect(img)
+        if isthere is not None:
+            confirmedUser = True
+            res = bytes(pyzbar.decode(img)[0].data.decode('unicode_escape')[2:-1], encoding="raw_unicode_escape")
+            print(res)
+            decMessage = rsa.decrypt(res, privateKey).decode()
+            print("decrypted string: ", decMessage)
+            #Här behövs try och catches samt en koll av tid och massa formatering och skit
+        countdown -= 1
+    if confirmedUser:
+        print("ok")
+    else:
+        print("not ok")
 
-def takePicture():
-    PiCamera.capture('/home/pi/diggi/EITA65-workspace/LP4/bilder/test1.jpg')  # directory
 
     ##Denna flyttar drönare från a till b och kallar på updateStatus under tiden
 def partOfRun(id, current, finnish):
@@ -136,18 +144,18 @@ def play(tune):
 
 def waiting(id):
     updateStatus(id, 'waiting', current_coords)
-    sense.clear()
-    draw(steve)
-    joystick = " "
-    while joystick is not "up":
-      for event in sense.stick.get_events():
-        # Check if the joystick was pressed
-        if event.action == "pressed":
-          # Check which direction
-          if event.direction == "up":
-              joystick = "up"
-          # Wait a while and then clear the screen
-          sleep(0.5)
+    ##sense.clear()
+    ##draw(steve)
+    ##joystick = " "
+    ##while joystick is not "up":
+    ##  for event in sense.stick.get_events():
+    ##    # Check if the joystick was pressed
+    ##    if event.action == "pressed":
+    ##      # Check which direction
+    ##      if event.direction == "up":
+    ##          joystick = "up"
+    ##      # Wait a while and then clear the screen
+    ##      sleep(0.5)
 
 
 if __name__ == "__main__":
