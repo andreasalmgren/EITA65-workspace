@@ -102,50 +102,56 @@ def check():
     confirmedUser = False
     camera.start_preview()
     while (countdown is not 0 and not confirmedUser):
-        print(countdown)
+        #print(countdown)
         filePath = '/home/pi/diggi/EITA65-workspace/LP4/bilder/test1.jpg'
         camera.capture(filePath)
         img = cv2.imread(filePath)
         #img = cv2.imread('/home/pi/diggi/EITA65-workspace/LP4/Lab3/phone/dd.png')
         detector = cv2.QRCodeDetector()
         isthere, points = detector.detect(img)
-        print(isthere)
+        #print(isthere)
         if isthere:
             decMessage = ""
             try:
                 res = bytes(pyzbar.decode(img)[0].data.decode('unicode_escape')[2:-1], encoding="raw_unicode_escape")
-                print(res)
+                #print(res)
                 decMessage = rsa.decrypt(res, privateKey).decode()
-                print("decrypted string: ", decMessage)
+                #print("decrypted string: ", decMessage)
                 tid = decMessage[:7]
                 time_from_pi = convert(tid)
                 time_from_drone = convert(datetime.now().strftime("%H:%M:%S"))
                 
-                print(tid)
-                print(datetime.now().strftime("%H:%M:%S"))
+                #print(tid)
+                #print(datetime.now().strftime("%H:%M:%S"))
                 
-                if abs(time_from_pi - time_from_drone) < 180 or (time_from_pi - time_from_drone - 86400) < 180 or abs(time_from_pi - time_from_drone + 86400) < 180:
-                    print(decMessage[9:])
-                    print(customer)
+                
+                if (abs(time_from_pi - time_from_drone) < 180) or (abs(time_from_pi - time_from_drone - 86400) < 180) or (abs(time_from_pi - time_from_drone + 86400) < 180):
+                    #print(decMessage[9:])
+                    #print(customer)
                     if decMessage[9:] == customer:
                         confirmedUser = True
+                    else:
+                        print("fel användare")
+                else:
+                    print("gammal QR-kod")
             except:
-                print("lol fel krypterat, klick klack")
+                print("Detta verkar inte vara en korrekt krypterad QR-kod")
 
-
+        else:
+            print("ser ingen QR-kod")
             #Här behövs try och catches samt en koll av tid och massa formatering och skit
         countdown -= 1
     camera.stop_preview()
     if confirmedUser:
-        print("ok")
+        print("\nLämnar ut paket!")
     else:
-        print("not ok")
+        print("\nLämnar inte ut paket")
 
 
     ##Denna flyttar drönare från a till b och kallar på updateStatus under tiden
 def convert(time_to_convert):
     ftr = [3600, 60, 1]
-    print('hej') 
+    #print('hej') 
     return sum([a * b for a, b in zip(ftr, map(int, time_to_convert.split(':')))])
 
 
