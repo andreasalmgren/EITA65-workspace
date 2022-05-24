@@ -1,7 +1,6 @@
 import math, requests, argparse, pygame, rsa, cv2, re
 import pyzbar.pyzbar as pyzbar
 from picamera import PiCamera
-from sense_hat import SenseHat
 from time import sleep
 from datetime import datetime
 
@@ -12,44 +11,11 @@ with open('privateKey.txt', 'rb') as f:
 print(type(privateKey))
 
 camera = PiCamera()
-##sense = SenseHat() 
 pygame.mixer.init()
 customer = 'Person som har köpt saker'
 
 
-g = (0, 255, 0)
-r = (255, 0, 0)
-b = (255, 255, 204)
-       
-greenAlien = [
-g,g,g,g,g,g,g,g,
-g,g,g,g,g,g,g,g,
-g,g,g,g,g,g,g,g,
-g,g,g,g,g,g,g,g,
-g,g,g,g,g,g,g,g,
-g,g,g,g,g,g,g,g,
-g,g,g,g,g,g,g,g,
-g,g,g,g,g,g,g,g]
 
-redCreeper = [
-r,r,r,r,r,r,r,r,
-r,r,r,r,r,r,r,r,
-r,r,r,r,r,r,r,r,
-r,r,r,r,r,r,r,r,
-r,r,r,r,r,r,r,r,
-r,r,r,r,r,r,r,r,
-r,r,r,r,r,r,r,r,
-r,r,r,r,r,r,r,r]
-
-steve = [
-b,b,b,b,b,b,b,b,
-b,b,b,b,b,b,b,b,
-b,b,b,b,b,b,b,b,
-b,b,b,b,b,b,b,b,
-b,b,b,b,b,b,b,b,
-b,b,b,b,b,b,b,b,
-b,b,b,b,b,b,b,b,
-b,b,b,b,b,b,b,b]
 
 def getMovement(src, dst):
     speed = 0.00001
@@ -69,9 +35,6 @@ def moveDrone(src, d_long, d_la):
     ##Denna funktion kallar på andra funktioner för att flytta drönarna och uppdatera status
 def run(id, current_coords, from_coords, to_coords, SERVER_URL):
 
-    ##Tar drönare från nuvarande plats till pick up uppdaterar current_coords
-    ##draw(redCreeper)
-    ##play("coin.wav")
     sleep(3)
     ##play("space-odyssey.mp3")
     partOfRun(id, current_coords, from_coords)
@@ -80,7 +43,7 @@ def run(id, current_coords, from_coords, to_coords, SERVER_URL):
     waiting(id)
     
     ##Tar drönare från pickup plats till drop off
-    ##draw(redCreeper)-    play("space-odyssey.mp3")
+    ##play("space-odyssey.mp3")
     partOfRun(id, from_coords, to_coords)
     
     ##play("doorbell.mp3")
@@ -89,11 +52,13 @@ def run(id, current_coords, from_coords, to_coords, SERVER_URL):
     #Här vill vi har vår check funktion vi kanske måste skriva om delarna som använder sensehat :s
     check()
 
-
-
     ##Denna del sätter sedan status till idle
     updateStatus(id, 'idle', current_coords)
-    ##draw(greenAlien)
+
+    ##Denna flyttar drönare från a till b och kallar på updateStatus under tiden
+    def convert(time_to_convert):
+        ftr = [3600, 60, 1]
+        return sum([a * b for a, b in zip(ftr, map(int, time_to_convert.split(':')))])
 
     return current_coords[0], current_coords[1]
 
@@ -102,32 +67,21 @@ def check():
     confirmedUser = False
     camera.start_preview()
     while (countdown is not 0 and not confirmedUser):
-        #print(countdown)
         filePath = '/home/pi/diggi/EITA65-workspace/LP4/bilder/test1.jpg'
         camera.capture(filePath)
         img = cv2.imread(filePath)
-        #img = cv2.imread('/home/pi/diggi/EITA65-workspace/LP4/Lab3/phone/dd.png')
         detector = cv2.QRCodeDetector()
         isthere, points = detector.detect(img)
-        #print(isthere)
         if isthere:
             decMessage = ""
             try:
                 res = bytes(pyzbar.decode(img)[0].data.decode('unicode_escape')[2:-1], encoding="raw_unicode_escape")
-                #print(res)
                 decMessage = rsa.decrypt(res, privateKey).decode()
-                #print("decrypted string: ", decMessage)
                 tid = decMessage[:7]
                 time_from_pi = convert(tid)
                 time_from_drone = convert(datetime.now().strftime("%H:%M:%S"))
-                
-                #print(tid)
-                #print(datetime.now().strftime("%H:%M:%S"))
-                
-                
+
                 if (abs(time_from_pi - time_from_drone) < 180) or (abs(time_from_pi - time_from_drone - 86400) < 180) or (abs(time_from_pi - time_from_drone + 86400) < 180):
-                    #print(decMessage[9:])
-                    #print(customer)
                     if decMessage[9:] == customer:
                         confirmedUser = True
                     else:
@@ -148,11 +102,7 @@ def check():
         print("\nLämnar inte ut paket")
 
 
-    ##Denna flyttar drönare från a till b och kallar på updateStatus under tiden
-def convert(time_to_convert):
-    ftr = [3600, 60, 1]
-    #print('hej') 
-    return sum([a * b for a, b in zip(ftr, map(int, time_to_convert.split(':')))])
+
 
 
 def partOfRun(id, current, finnish):
@@ -172,28 +122,13 @@ def updateStatus(id, status, current_coords):
                       }
         print(drone_info)
         resp = session.post(SERVER_URL, json=drone_info)
-        
-def draw(image):
-    sense.set_pixels(image)
-    
+
 def play(tune):
     pygame.mixer.music.load(tune)
     pygame.mixer.music.play()
 
 def waiting(id):
     updateStatus(id, 'waiting', current_coords)
-    ##sense.clear()
-    ##draw(steve)
-    ##joystick = " "
-    ##while joystick is not "up":
-    ##  for event in sense.stick.get_events():
-    ##    # Check if the joystick was pressed
-    ##    if event.action == "pressed":
-    ##      # Check which direction
-    ##      if event.direction == "up":
-    ##          joystick = "up"
-    ##      # Wait a while and then clear the screen
-    ##      sleep(0.5)
 
 
 if __name__ == "__main__":
